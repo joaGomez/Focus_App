@@ -1,0 +1,27 @@
+# Ignorar carpeta Audios completa
+Audios/
+
+# Ignorar carpeta de environment
+env/
+
+
+# Ignorar solo imágenes dentro de Imagenes
+# (cubre .png, .jpg, .jpeg, .gif, etc.)
+Imagenes/*.png
+Imagenes/*.jpg
+Imagenes/*.jpeg
+Imagenes/*.gif
+Imagenes/*.webp
+Imagenes/*.bmp
+Imagenes/*.svg
+
+# Ignorar archivo playlists.json en Data
+Data/playlists.json
+
+# Opcional: ignorar archivos temporales de Python o del sistema
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.DS_Store
+Thumbs.db
