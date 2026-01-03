@@ -1,0 +1,1 @@
+This readme will be completed in the future, when the first version of the app is ready.
