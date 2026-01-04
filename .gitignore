@@ -17,7 +17,7 @@ Imagenes/*.bmp
 Imagenes/*.svg
 
 # Ignorar archivo playlists.json en Data
-# Data/playlists.json
+Data/playlists.json
 
 # ignorar archivos temporales de Python o del sistema
 __pycache__/
