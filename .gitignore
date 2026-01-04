@@ -1,6 +1,5 @@
 # Ignorar carpeta Audios completa
-Audios/*
-!Audios/.gitkeep
+# Audios/
 
 
 # Ignorar carpeta de environment
@@ -9,17 +8,16 @@ env/
 
 # Ignorar solo imágenes dentro de Imagenes
 # (cubre .png, .jpg, .jpeg, .gif, etc.)
-Imagenes/*.png
-Imagenes/*.jpg
-Imagenes/*.jpeg
-Imagenes/*.gif
-Imagenes/*.webp
-Imagenes/*.bmp
-Imagenes/*.svg
-!Imagenes/.gitkeep
+# Imagenes/*.png
+# Imagenes/*.jpg
+# Imagenes/*.jpeg
+# Imagenes/*.gif
+# Imagenes/*.webp
+# Imagenes/*.bmp
+# Imagenes/*.svg
 
 # Ignorar archivo playlists.json en Data
-# Data/playlists.json
+Data/playlists.json
 
 # ignorar archivos temporales de Python o del sistema
 __pycache__/
