@@ -1,0 +1,27 @@
+{
+    "playlists": [
+        {
+            "name": "Lo-Fi Rap",
+            "cover": "Imagenes/Playlist_fondo.jpg",
+            "tracks": [
+                "Audios/Drake_Lofi_Mix.mp3"
+            ]
+        },
+        {
+            "name": "Pop",
+            "cover": "Imagenes/Playlist_fondo.jpg",
+            "tracks": [
+                "C:/Workspace/Scripts/Focus_App/Audios/Bound.mp3"
+            ]
+        },
+        {
+            "name": "test playlist",
+            "cover": "Imagenes/Playlist_fondo.jpg",
+            "tracks": [
+                "C:/Workspace/Scripts/Focus_App/Audios/Bound.mp3",
+                "C:/Workspace/Scripts/Focus_App/Audios/Drake_Lofi_Mix.mp3",
+                "C:/Workspace/Scripts/Focus_App/Audios/Kanye_West_Ghost_town.mp3"
+            ]
+        }
+    ]
+}
