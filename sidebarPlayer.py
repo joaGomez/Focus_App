@@ -57,11 +57,13 @@ class AudioPlayer():
 
 
 class SidebarPlayer(QWidget):
-    def __init__(self):
+    def __init__(self, refresh_callback_play_button = None):
         super().__init__()
 
         self.current_playlist = None
         self.current_index = 0
+        
+        self.refresh_callback = refresh_callback_play_button
 
         # ---- MEDIA PLAYER ----
         self.audioPlayer = AudioPlayer()
@@ -140,10 +142,20 @@ class SidebarPlayer(QWidget):
     def toggle_play(self):
         if self.audioPlayer.state == PlayerState.PLAYING:
             self.audioPlayer.set_audio_player_state(PlayerState.PAUSED)     # Pause audio output
-            self.btn_play.setText("▶")
+            # self.btn_play.setText("▶")
         elif self.audioPlayer.state == PlayerState.PAUSED or self.audioPlayer.state == PlayerState.STOPPED:
             self.audioPlayer.set_audio_player_state(PlayerState.PLAYING)    # Continues audio output
+            # self.btn_play.setText("⏸")
+            
+        if self.refresh_callback:
+            self.refresh_callback(self.audioPlayer.state)
+    
+    def plot_play_button(self, state):
+        if state == PlayerState.PAUSED or state == PlayerState.STOPPED:
+            self.btn_play.setText("▶")
+        elif state == PlayerState.PLAYING:
             self.btn_play.setText("⏸")
+        
 
     def previous_track(self):
         if not self.current_playlist: return

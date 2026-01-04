@@ -1,29 +1,3 @@
-
-
-
-
-# class Sidebar(QWidget, manager):
-#     def __init__(self):
-#         super().__init__()
-
-#         layout = QVBoxLayout(self)
-#         layout.setSpacing(20)
-
-#         self.timer = TimerWidget()
-        
-#         # --- Reproductor ---
-#         self.player = SidebarPlayer()
-#         layout.addWidget(self.player)
-        
-
-#         layout.addWidget(self.timer)
-#         layout.addStretch()
-
-#         layout.addWidget(QPushButton("Nueva playlist"))
-#         layout.addWidget(QPushButton("Configuración"))
-        
-
-
 from constants import *
 
 
@@ -34,7 +8,7 @@ from playlistManager import PlaylistManager
 
 
 class Sidebar(QWidget):
-    def __init__(self, manager: PlaylistManager, playlist_view, refresh_callback=None):
+    def __init__(self, manager: PlaylistManager, playlist_view, refresh_callback=None, refresh_callback_play_button_player=None):
         """
         manager → PlaylistManager
         refresh_callback → función para que MainWindow refresque el grid
@@ -43,6 +17,7 @@ class Sidebar(QWidget):
 
         self.manager = manager
         self.refresh_callback = refresh_callback
+        self.refresh_callback_player = refresh_callback_play_button_player
 
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(20)
@@ -50,7 +25,7 @@ class Sidebar(QWidget):
         self.timer = TimerWidget()
         
         # --- Reproductor ---
-        self.player = SidebarPlayer()
+        self.player = SidebarPlayer(refresh_callback_play_button=self.refresh_callback_player)
         self.layout.addWidget(self.player)
         
         self.player.set_playlist(playlist_view.playlist_title)

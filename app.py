@@ -19,7 +19,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         central_layout = QVBoxLayout(central)
 
-        self.playlist_view = PlaylistView(refresh_callback_playlist = self.update_playlist_selected, refresh_callback_state = self.update_playlist_state)     # Playlist Selected
+        self.playlist_view = PlaylistView(refresh_callback_playlist = self.update_playlist_selected, 
+                                          refresh_callback_state = self.update_playlist_state, 
+                                          refresh_callback_play_button = self.update_play_button)     # Playlist Selected
 
         self.playlists_grid = PlaylistsGrid(
             self.playlist_view,
@@ -39,7 +41,8 @@ class MainWindow(QMainWindow):
         self.sidebar = Sidebar(
             self.manager,
             self.playlist_view,
-            refresh_callback = self.refresh_playlists
+            refresh_callback = self.refresh_playlists,
+            refresh_callback_play_button_player=self.update_play_button
         )
         
         dock.setWidget(self.sidebar)
@@ -72,5 +75,11 @@ class MainWindow(QMainWindow):
         
         
     def update_playlist_state(self, newState):
-        if self.sidebar.player.current_playlist:    # Playlist not null
+        if self.sidebar.player.current_playlist:                        # Playlist not null
             self.sidebar.player.audioPlayer.set_audio_player_state(newState)
+            
+    def update_play_button(self, newState):
+        if self.sidebar.player.current_playlist:                        # Playlist not null
+            self.sidebar.player.plot_play_button(newState)              # Update play button on sidebar
+            self.playlist_view.plot_play_button(newState)               # Update play button in playlist view
+            

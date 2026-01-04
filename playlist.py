@@ -71,7 +71,9 @@ class PlaylistCard(QWidget):
 # ======================================================
 
 class PlaylistView(QWidget):
-    def __init__(self, refresh_callback_playlist=None, refresh_callback_state = None):
+    def __init__(self, refresh_callback_playlist=None, 
+                 refresh_callback_state=None, 
+                 refresh_callback_play_button=None):
         super().__init__()
 
         self.current_image_path = None
@@ -80,7 +82,7 @@ class PlaylistView(QWidget):
         
         self.refresh_callback_playlist = refresh_callback_playlist
         self.refresh_callback_state = refresh_callback_state
-        
+        self.refresh_callback_play_button = refresh_callback_play_button
 
         self.main_layout = QVBoxLayout(self)
 
@@ -199,21 +201,24 @@ class PlaylistView(QWidget):
         if self.state == PlayerState.STOPPED or self.state == PlayerState.PAUSED:
             self.state = PlayerState.PLAYING
             
-            self.play_button.setText("Pausar")
-            
-            if self.refresh_callback_state:
-                self.refresh_callback_state(PlayerState.PLAYING)
             
         elif self.state == PlayerState.PLAYING:
             self.state = PlayerState.PAUSED
-            self.play_button.setText("Reproducir")
-
-            if self.refresh_callback_state:
-                self.refresh_callback_state(PlayerState.PAUSED)
+            
+        if self.refresh_callback_state:
+            self.refresh_callback_state(self.state)
+        
+        if self.refresh_callback_play_button:
+            self.refresh_callback_play_button(self.state)
+                        
+        
                 
-        print(f'playlist.py: state = {self.state}')
         
-        
+    def plot_play_button(self, state):
+        if state == PlayerState.PAUSED or state == PlayerState.STOPPED:
+            self.play_button.setText("Reproducir")
+        elif state == PlayerState.PLAYING:
+            self.play_button.setText("Pausar")
         
     
 
