@@ -106,7 +106,7 @@ class PlaylistView(QWidget):
             color: white; 
             font-weight: bold;
         """)
-        self.title.hide()              # <---- Ocultamos inicialmente
+        self.title.hide()              # <---- Ocultamos inicialmente 
         self.info_layout.addWidget(self.title)
 
         # Botón reproducir/pausar (oculto al inicio)
@@ -130,8 +130,7 @@ class PlaylistView(QWidget):
         self.info_layout.addStretch()
         self.main_layout.addLayout(self.info_layout)
 
-        # Estado interno
-        # self.is_playing = False
+        
         
         
         

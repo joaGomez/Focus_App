@@ -4,6 +4,7 @@ import pygame
 import time
 from mutagen.mp3 import MP3
 import msvcrt
+from PySide6.QtCore import QTimer
 
 
 
@@ -52,18 +53,23 @@ class AudioPlayer():
 
         elif self.state == PlayerState.STOPPED:
             pygame.mixer.music.stop()
+            
+    def set_song_time(self, time):
+        self.current_time = time
     
         
 
 
 class SidebarPlayer(QWidget):
-    def __init__(self, refresh_callback_play_button = None):
+    def __init__(self, refresh_callback_play_button = None,
+                refresh_callback_state = None):
         super().__init__()
 
         self.current_playlist = None
         self.current_index = 0
         
         self.refresh_callback = refresh_callback_play_button
+        self.refresh_callback_state = refresh_callback_state
 
         # ---- MEDIA PLAYER ----
         self.audioPlayer = AudioPlayer()
@@ -80,6 +86,14 @@ class SidebarPlayer(QWidget):
         # ---- TIEMPO ----
         self.time_label = QLabel("00:00 / 00:00")
         self.time_label.setAlignment(Qt.AlignCenter)
+
+        # ---- TIMER DE TIEMPO ----
+        self.timer = QTimer()
+        self.timer.setInterval(100)   # 100 ms
+        self.timer.timeout.connect(self.update_time)
+        self.timer_running = False
+
+
 
         # ---- SLIDER ----
         self.slider = QSlider(Qt.Horizontal)
@@ -127,8 +141,17 @@ class SidebarPlayer(QWidget):
             return
         
         self.current_playlist = playlist
+        
+        # Reset states and buttons
         self.current_index = 0
-        # self.load_track(0)
+        
+        # new_song_duration = self.current_playlist["tracks"][self.current_index]
+        
+        self.update_duration(self.audioPlayer.total_duration)
+        
+        self.plot_play_button(PlayerState.STOPPED)
+        
+        
         
         print(f'Playlist seleccionada: {playlist}')
         
@@ -141,14 +164,19 @@ class SidebarPlayer(QWidget):
     # ======================================================
     def toggle_play(self):
         if self.audioPlayer.state == PlayerState.PLAYING:
-            self.audioPlayer.set_audio_player_state(PlayerState.PAUSED)     # Pause audio output
-            # self.btn_play.setText("▶")
-        elif self.audioPlayer.state == PlayerState.PAUSED or self.audioPlayer.state == PlayerState.STOPPED:
-            self.audioPlayer.set_audio_player_state(PlayerState.PLAYING)    # Continues audio output
-            # self.btn_play.setText("⏸")
-            
-        if self.refresh_callback:
+            self.audioPlayer.set_audio_player_state(PlayerState.PAUSED)
+            # self.timer.stop()
+
+        elif self.audioPlayer.state in (PlayerState.PAUSED, PlayerState.STOPPED):
+            self.audioPlayer.set_audio_player_state(PlayerState.PLAYING)
+            # self.timer.start()
+
+        if self.refresh_callback:               # Updates play button
             self.refresh_callback(self.audioPlayer.state)
+        
+        if self.refresh_callback_state:         # Updates timer state
+            self.refresh_callback_state(self.audioPlayer.state)
+
     
     def plot_play_button(self, state):
         if state == PlayerState.PAUSED or state == PlayerState.STOPPED:
@@ -161,12 +189,11 @@ class SidebarPlayer(QWidget):
         if not self.current_playlist: return
         
         if self.audioPlayer.current_time >= 1.0:
-            self.audioPlayer.current_time = 0.0                         # Same song but it restarts
-
+            self.restart_timer()                                        # Same song but restarts
+        
         else:
             self.current_index = max(0, self.current_index - 1)         # Index cant be less than 0 (First song)
-            self.audioPlayer.current_time = 0.0                         # New song must start form 0:00
-            
+            self.restart_timer()                                        # New song must start form 0:00
         
         # Set audio file to audio player
         
@@ -180,12 +207,13 @@ class SidebarPlayer(QWidget):
         if self.current_index < (len(self.current_playlist["tracks"])-1):
             
             self.current_index = self.current_index + 1                             # Next song
-            self.audioPlayer.current_time = 0.0                                     # New song must start form 0:00
+            self.restart_timer()                                                    # New song must start form 0:00
             
         elif self.current_index == (len(self.current_playlist["tracks"])-1):
             self.current_index = 0                                                  # Restarts playlist
-            self.audioPlayer.current_time = 0.0                                     # New song must start form 0:00
-
+            self.restart_timer()                                                    # New song must start form 0:00          
+            
+            
             # Auto restart ?
             # if not auto_restart:                                                          # if auto restart selected -> Playlist restarts and continues playing. ELse, not.
             #     self.audioPlayer.set_audio_player_state(PlayerState.STOPPED)
@@ -197,6 +225,48 @@ class SidebarPlayer(QWidget):
         audio_path = self.current_playlist["tracks"][self.current_index]
         
         self.audioPlayer.set_audio_player(audio_file_path = audio_path)
+
+
+
+    def update_time(self):
+        if self.audioPlayer.state != PlayerState.PLAYING:
+            return
+
+        # avanzar el tiempo local
+        self.audioPlayer.current_time += 0.1  # porque timer = 100ms
+
+        # si se pasa del total → siguiente canción
+        if self.audioPlayer.current_time >= self.audioPlayer.total_duration:
+            self.next_track()
+            return
+
+        # Actualizar slider
+        if self.audioPlayer.total_duration > 0:
+            percent = int((self.audioPlayer.current_time / self.audioPlayer.total_duration) * 1000)
+            self.slider.setValue(percent)
+
+        # actualizar label
+        self.update_time_label()
+        
+    def update_time_label(self):
+        pos = int(self.audioPlayer.current_time)
+        dur = int(self.audioPlayer.total_duration)
+        
+        print(f"duration: {dur}")
+        
+        print(pos)
+
+        def fmt(x):
+            m, s = divmod(x, 60)
+            return f"{m:02}:{s:02}"
+
+        self.time_label.setText(f"{fmt(pos)} / {fmt(dur)}")
+        
+    def restart_timer(self):
+        self.audioPlayer.current_time = 0.0                                     
+        self.update_time_label()
+        self.slider.setValue(0)
+
 
     # ======================================================
     # CARGA
@@ -234,15 +304,15 @@ class SidebarPlayer(QWidget):
     def update_duration(self, dur):
         self.update_time_label()
 
-    def update_time_label(self):
-        pos = self.player.position() // 1000
-        dur = self.player.duration() // 1000
+    # def update_time_label(self):
+    #     pos = self.audioPlayer.position() // 1000
+    #     dur = self.audioPlayer.duration() // 1000
 
-        def fmt(x):
-            m, s = divmod(x, 60)
-            return f"{m:02}:{s:02}"
+    #     def fmt(x):
+    #         m, s = divmod(x, 60)
+    #         return f"{m:02}:{s:02}"
 
-        self.time_label.setText(f"{fmt(pos)} / {fmt(dur)}")
+    #     self.time_label.setText(f"{fmt(pos)} / {fmt(dur)}")
 
     def seek(self, value):
         if self.player.duration() > 0:

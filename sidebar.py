@@ -8,7 +8,10 @@ from playlistManager import PlaylistManager
 
 
 class Sidebar(QWidget):
-    def __init__(self, manager: PlaylistManager, playlist_view, refresh_callback=None, refresh_callback_play_button_player=None):
+    def __init__(self, manager: PlaylistManager, playlist_view, 
+                refresh_callback=None, 
+                refresh_callback_play_button_player=None,
+                refresh_callback_state = None):
         """
         manager → PlaylistManager
         refresh_callback → función para que MainWindow refresque el grid
@@ -18,14 +21,17 @@ class Sidebar(QWidget):
         self.manager = manager
         self.refresh_callback = refresh_callback
         self.refresh_callback_player = refresh_callback_play_button_player
-
+        self.refresh_callback_state = refresh_callback_state
+        
+        
         self.layout = QVBoxLayout(self)
         self.layout.setSpacing(20)
 
         self.timer = TimerWidget()
         
         # --- Reproductor ---
-        self.player = SidebarPlayer(refresh_callback_play_button=self.refresh_callback_player)
+        self.player = SidebarPlayer(refresh_callback_play_button=self.refresh_callback_player,
+                                    refresh_callback_state=self.refresh_callback_state)
         self.layout.addWidget(self.player)
         
         self.player.set_playlist(playlist_view.playlist_title)

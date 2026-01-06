@@ -42,7 +42,8 @@ class MainWindow(QMainWindow):
             self.manager,
             self.playlist_view,
             refresh_callback = self.refresh_playlists,
-            refresh_callback_play_button_player=self.update_play_button
+            refresh_callback_play_button_player=self.update_play_button,
+            refresh_callback_state = self.update_playlist_state
         )
         
         dock.setWidget(self.sidebar)
@@ -60,11 +61,11 @@ class MainWindow(QMainWindow):
         self.sidebar.player.set_playlist(playlist_selected)
         
         # Set audio file to audio player
-        
         audio_path = self.sidebar.player.current_playlist["tracks"][self.sidebar.player.current_index]
         
-        
         self.sidebar.player.audioPlayer.set_audio_player(audio_file_path = audio_path)
+        
+        self.sidebar.player.restart_timer()    
         
     
         
@@ -77,6 +78,15 @@ class MainWindow(QMainWindow):
     def update_playlist_state(self, newState):
         if self.sidebar.player.current_playlist:                        # Playlist not null
             self.sidebar.player.audioPlayer.set_audio_player_state(newState)
+            
+            if newState == PlayerState.PLAYING:
+                self.sidebar.player.timer.start()
+                
+            elif newState in (PlayerState.STOPPED, PlayerState.PAUSED):
+                self.sidebar.player.timer.stop()
+            
+            
+        
             
     def update_play_button(self, newState):
         if self.sidebar.player.current_playlist:                        # Playlist not null
