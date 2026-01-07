@@ -64,6 +64,7 @@ class AudioPlayer():
             
     def set_song_time(self, time):
         self.current_time = time
+        pygame.mixer.music.set_pos(self.current_time)
     
         
 
@@ -155,7 +156,7 @@ class SidebarPlayer(QWidget):
         
         # new_song_duration = self.current_playlist["tracks"][self.current_index]
         
-        self.update_duration(self.audioPlayer.total_duration)
+        self.update_time_label()
         
         self.plot_play_button(PlayerState.STOPPED)
         
@@ -217,8 +218,6 @@ class SidebarPlayer(QWidget):
             
 
     def next_track(self):
-
-        print(len(self.current_playlist["tracks"]))
         
         if self.current_index < (len(self.current_playlist["tracks"])-1):
             self.current_index = self.current_index + 1                             # Next song
@@ -262,15 +261,6 @@ class SidebarPlayer(QWidget):
         # actualizar label
         self.update_time_label()
         
-    def update_time_label(self):
-        pos = int(self.audioPlayer.current_time)
-        dur = int(self.audioPlayer.total_duration)
-        
-        def fmt(x):
-            m, s = divmod(x, 60)
-            return f"{m:02}:{s:02}"
-
-        self.time_label.setText(f"{fmt(pos)} / {fmt(dur)}")
         
     def restart_timer(self):
         self.audioPlayer.current_time = 0.0                                     
@@ -278,28 +268,6 @@ class SidebarPlayer(QWidget):
         self.slider.setValue(0)
 
 
-    # ======================================================
-    # CARGA
-    # ======================================================
-    # def load_track(self, index):
-    #     if not self.current_playlist:
-    #         return
-        
-    #     # self.audioPlayer.set_audio_player()
-        
-    #     audio = self.current_playlist["tracks"][index]
-    #     url = QUrl.fromLocalFile(audio)
-
-
-    #     print('Audio seleccionado')
-    #     print(audio)
-    #     print('URL del audio seleccionado')
-    #     print(url)
-
-
-    #     self.player.setSource(url)
-    #     self.player.play()
-    #     self.btn_play.setText("⏸")
 
     # ======================================================
     # TIEMPO Y SLIDER
@@ -311,23 +279,34 @@ class SidebarPlayer(QWidget):
 
         self.update_time_label()
 
-    def update_duration(self, dur):
-        self.update_time_label()
 
-    # def update_time_label(self):
-    #     pos = self.audioPlayer.position() // 1000
-    #     dur = self.audioPlayer.duration() // 1000
 
-    #     def fmt(x):
-    #         m, s = divmod(x, 60)
-    #         return f"{m:02}:{s:02}"
 
-    #     self.time_label.setText(f"{fmt(pos)} / {fmt(dur)}")
+    def update_time_label(self):
+        pos = int(self.audioPlayer.current_time)
+        dur = int(self.audioPlayer.total_duration)
+        
+        def fmt(x):
+            m, s = divmod(x, 60)
+            return f"{m:02}:{s:02}"
+
+        self.time_label.setText(f"{fmt(pos)} / {fmt(dur)}")
+
+
+
+
 
     def seek(self, value):
-        if self.player.duration() > 0:
-            new_pos = int(self.player.duration() * (value / 1000))
-            self.player.setPosition(new_pos)
+        
+        if self.audioPlayer.total_duration > 0:
+            new_pos = int((value/1000) * self.audioPlayer.total_duration)
+            self.audioPlayer.set_song_time(new_pos)
+        
+        
+        
+        # if self.player.duration() > 0:
+        #     new_pos = int(self.player.duration() * (value / 1000))
+        #     self.player.setPosition(new_pos)
 
     # ======================================================
     # FINAL AUTOMÁTICO
