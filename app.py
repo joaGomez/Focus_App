@@ -86,7 +86,6 @@ class MainWindow(QMainWindow):
                 self.sidebar.player.timer.stop()
             
             
-        
             
     def update_play_button(self, newState):
         if self.sidebar.player.current_playlist:                        # Playlist not null

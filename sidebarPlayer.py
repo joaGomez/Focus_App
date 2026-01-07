@@ -34,7 +34,15 @@ class AudioPlayer():
         self.audio = MP3(audio_file_path)
         self.total_duration = self.audio.info.length
         pygame.mixer.music.load(audio_file_path)
-        pygame.mixer.music.set_volume(self.volume)      
+        pygame.mixer.music.set_volume(self.volume)
+        # pygame.mixer.music.play()
+        
+        if self.state == PlayerState.PLAYING:
+            pygame.mixer.music.play()
+        
+        print('Se cargo el audio de la canción')
+        
+        
         
         
     def set_audio_player_volume(self, volume):
@@ -165,11 +173,9 @@ class SidebarPlayer(QWidget):
     def toggle_play(self):
         if self.audioPlayer.state == PlayerState.PLAYING:
             self.audioPlayer.set_audio_player_state(PlayerState.PAUSED)
-            # self.timer.stop()
 
         elif self.audioPlayer.state in (PlayerState.PAUSED, PlayerState.STOPPED):
             self.audioPlayer.set_audio_player_state(PlayerState.PLAYING)
-            # self.timer.start()
 
         if self.refresh_callback:               # Updates play button
             self.refresh_callback(self.audioPlayer.state)
@@ -185,46 +191,107 @@ class SidebarPlayer(QWidget):
             self.btn_play.setText("⏸")
         
 
+    
     def previous_track(self):
         if not self.current_playlist: return
         
-        if self.audioPlayer.current_time >= 1.0:
-            self.restart_timer()                                        # Same song but restarts
+        # If song started (timer >= 1.0s) -> Song restarts
+
+        # If song first in the playlist, it must restart to itself -> No index change
+        
+        if self.audioPlayer.current_time >= 1.0 or self.current_index == 0:     
+            self.restart_timer()                                                # Same song but restarts
+            print('Se reinicia la canción')
+            pygame.mixer.music.stop()
+            pygame.mixer.music.play()
+            
+        
+            
         
         else:
-            self.current_index = max(0, self.current_index - 1)         # Index cant be less than 0 (First song)
+            self.current_index = self.current_index - 1                  # Index from previous song
             self.restart_timer()                                        # New song must start form 0:00
+            print('Se cambia a la canción anterior')
+           
+            # Set audio file to audio player
+                
+            audio_path = self.current_playlist["tracks"][self.current_index]
+            
+            self.audioPlayer.set_audio_player(audio_file_path = audio_path)
+                        
+            print(f'Nueva canción en la fila: {self.audioPlayer.audio_path}')
         
-        # Set audio file to audio player
         
-        audio_path = self.current_playlist["tracks"][self.current_index]
         
-        self.audioPlayer.set_audio_player(audio_file_path = audio_path)
             
 
     def next_track(self):
 
+        print(len(self.current_playlist["tracks"]))
+        
         if self.current_index < (len(self.current_playlist["tracks"])-1):
-            
             self.current_index = self.current_index + 1                             # Next song
-            self.restart_timer()                                                    # New song must start form 0:00
             
         elif self.current_index == (len(self.current_playlist["tracks"])-1):
-            self.current_index = 0                                                  # Restarts playlist
-            self.restart_timer()                                                    # New song must start form 0:00          
+            self.current_index = 0                              # Restarts playlist
             
             
             # Auto restart ?
             # if not auto_restart:                                                          # if auto restart selected -> Playlist restarts and continues playing. ELse, not.
             #     self.audioPlayer.set_audio_player_state(PlayerState.STOPPED)
-            
-            
-            
+        
+                    
+        # If playlist has only one song -> Restarts same song over agan    
+        # if len(self.current_playlist["tracks"]) == 1:            
+        #     pygame.mixer.music.stop()
+        #     pygame.mixer.music.play()
+        #     return
+        
+
+
         # Set audio file to audio player
         
         audio_path = self.current_playlist["tracks"][self.current_index]
         
+        print(f'Nueva canción: {audio_path}')
+        
         self.audioPlayer.set_audio_player(audio_file_path = audio_path)
+
+        self.restart_timer()                                                    # New song must start form 0:00
+
+        
+    # def previous_track(self):
+    #     if not self.current_playlist: 
+    #         return
+
+    #     # Restart same song
+    #     if self.audioPlayer.current_time >= 1.0 or self.current_index == 0:
+    #         print("Reinicia la misma canción")
+    #         self.restart_timer()
+    #         audio_path = self.current_playlist["tracks"][self.current_index]
+    #         self.audioPlayer.set_audio_player(audio_file_path=audio_path)
+    #         return
+
+    #     # Previous song
+    #     self.current_index -= 1
+    #     print("Canción anterior")
+    #     self.restart_timer()
+
+    #     audio_path = self.current_playlist["tracks"][self.current_index]
+    #     self.audioPlayer.set_audio_player(audio_file_path=audio_path)
+
+    # def next_track(self):
+    #     length = len(self.current_playlist["tracks"])
+
+    #     if self.current_index < length - 1:
+    #         self.current_index += 1
+    #     else:
+    #         self.current_index = 0  # Loop playlist
+
+    #     self.restart_timer()
+
+    #     audio_path = self.current_playlist["tracks"][self.current_index]
+    #     self.audioPlayer.set_audio_player(audio_file_path=audio_path)
 
 
 
@@ -252,10 +319,6 @@ class SidebarPlayer(QWidget):
         pos = int(self.audioPlayer.current_time)
         dur = int(self.audioPlayer.total_duration)
         
-        print(f"duration: {dur}")
-        
-        print(pos)
-
         def fmt(x):
             m, s = divmod(x, 60)
             return f"{m:02}:{s:02}"
