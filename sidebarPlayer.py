@@ -34,19 +34,17 @@ class AudioPlayer():
         self.audio = MP3(audio_file_path)
         self.total_duration = self.audio.info.length
         pygame.mixer.music.load(audio_file_path)
-        pygame.mixer.music.set_volume(self.volume)
+        self.set_volume(self.volume)
         # pygame.mixer.music.play()
         
         if self.state == PlayerState.PLAYING:
             pygame.mixer.music.play()
         
-        print('Se cargo el audio de la canción')
         
-        
-        
-        
-    def set_audio_player_volume(self, volume):
+    def set_volume(self, volume):
         self.volume = volume
+        pygame.mixer.music.set_volume(self.volume)
+        
 
 
     def set_audio_player_state(self, newState):
@@ -65,6 +63,7 @@ class AudioPlayer():
     def set_song_time(self, time):
         self.current_time = time
         pygame.mixer.music.set_pos(self.current_time)
+        
     
         
 
@@ -107,6 +106,9 @@ class SidebarPlayer(QWidget):
         # ---- SLIDER ----
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, 1000)
+        
+
+        
 
         # ---- LAYOUT ----
         controls = QHBoxLayout()
@@ -314,3 +316,26 @@ class SidebarPlayer(QWidget):
     def check_finished(self, status):
         if status == QMediaPlayer.EndOfMedia:
             self.next_track()
+            
+            
+class VolumeWidget(QWidget):
+    def __init__(self, player=None):
+        super().__init__()
+
+        self.player = player  # tu reproductor interno
+        
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.icon = QLabel("🔊")
+        layout.addWidget(self.icon)
+        
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(0, 100)
+        self.slider.setValue(50)                                # Starting volume
+        
+        self.slider.valueChanged.connect(self.change_volume)
+        layout.addWidget(self.slider)
+
+    def change_volume(self, value):
+        self.player.set_volume(value/100)

@@ -2,7 +2,7 @@ from constants import *
 
 
 from timer import TimerWidget
-from sidebarPlayer import SidebarPlayer
+from sidebarPlayer import SidebarPlayer, VolumeWidget
 
 from playlistManager import PlaylistManager
 
@@ -25,7 +25,26 @@ class Sidebar(QWidget):
         
         
         self.layout = QVBoxLayout(self)
-        self.layout.setSpacing(20)
+        self.layout.setSpacing(5)
+        
+        # ------ VOLUME SLIDE ------
+
+
+        
+        # self.icon = QLabel("🔊")
+        # self.icon.setCursor(Qt.PointingHandCursor)
+        # self.icon.mousePressEvent = self.toggle_mute
+        # self.layout.addWidget(self.icon)
+        
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(0, 100)
+        self.slider.setValue(50)                                # Starting volume
+                
+        
+        self.slider.valueChanged.connect(self.change_volume)
+        self.layout.addWidget(self.slider)
+        
+        self.layout.setSpacing(5)
 
         self.timer = TimerWidget()
         
@@ -47,9 +66,7 @@ class Sidebar(QWidget):
         
         
         
-        # layout = QVBoxLayout(self)
-        # layout.setSpacing(15)
-
+        
         # ---------- BOTÓN: NUEVA PLAYLIST ----------
         btn_new = QPushButton("Nueva playlist")
         btn_new.clicked.connect(self.open_new_playlist_dialog)
@@ -70,6 +87,19 @@ class Sidebar(QWidget):
             # Si se creó una playlist nueva → refrescar UI
             if self.refresh_callback:
                 self.refresh_callback()
+                
+    def change_volume(self, value):
+        self.player.audioPlayer.set_volume(value/100)        
+        
+        # if value == 0:
+        #     self.icon.setText("🔇")
+        # elif value < 35:
+        #     self.icon.setText("🔈")
+        # elif value < 70:
+        #     self.icon.setText("🔉")
+        # else:
+        #     self.icon.setText("🔊")
+
                 
 
 
@@ -165,5 +195,4 @@ class NewPlaylistDialog(QDialog):
 
         self.manager.add_playlist(name, cover, tracks)
         self.accept()
-
 
